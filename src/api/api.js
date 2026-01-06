@@ -26,6 +26,9 @@ async function request(method, endpoint, data = null) {
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
     };
 
+    // normaliza endpoint para comparações (evita diferenças de letra maiúscula/minúscula)
+    const ep = endpoint.toLowerCase();
+
     /* ========================================================================
        MODO DEMO
        ======================================================================== */
@@ -33,10 +36,12 @@ async function request(method, endpoint, data = null) {
         await delay(400);
         console.log(`[DEMO] ${method} ${endpoint}`, data);
 
+        // (ep já está normalizado acima)
+
         // --------------------------------------------------------------------
         // LOGIN DEMO
         // --------------------------------------------------------------------
-        if (endpoint === "/User/login") {
+        if (ep === "/user/login") {
             const user = MOCK_USERS.find(
                 (u) => u.email === data.email && u.password === data.password
             );
@@ -47,7 +52,7 @@ async function request(method, endpoint, data = null) {
         // --------------------------------------------------------------------
         // REGISTRO DEMO
         // --------------------------------------------------------------------
-        if (endpoint === "/User" && method === "POST") {
+        if (ep === "/user" && method === "POST") {
             const newUser = {
                 id: Date.now(),
                 ...data,
@@ -60,19 +65,26 @@ async function request(method, endpoint, data = null) {
         // --------------------------------------------------------------------
         // LIVROS DEMO
         // --------------------------------------------------------------------
-        if (endpoint === "/Book" && method === "GET") return MOCK_BOOKS;
+        if (ep === "/book" && method === "GET") return MOCK_BOOKS;
 
-        if (endpoint === "/Book" && method === "POST") {
+        if (ep === "/book" && method === "POST") {
+            // create book response should follow ResponseBookDto
+            const owner = MOCK_USERS[0];
             const book = {
                 id: Date.now(),
-                ...data,
+                title: data.title,
+                author: data.author,
+                publicationYear: Number(data.publicationYear),
                 status: "Available",
+                ownerId: owner.id,
+                ownerName: owner.name,
+                ownerEmail: owner.email,
             };
             MOCK_BOOKS.push(book);
             return book;
         }
 
-        if (endpoint.startsWith("/Book/") && method === "DELETE") {
+        if (ep.startsWith("/book/") && method === "DELETE") {
             const id = parseInt(endpoint.split("/")[2]);
             MOCK_BOOKS = MOCK_BOOKS.filter((b) => b.id !== id);
             return true;
@@ -81,11 +93,23 @@ async function request(method, endpoint, data = null) {
         // --------------------------------------------------------------------
         // EMPRÉSTIMOS DEMO
         // --------------------------------------------------------------------
-        if (endpoint === "/Borrow/my-borrows") {
-            return MOCK_BORROWS.filter((b) => !b.returned);
+        if (ep === "/borrow/my-borrows") {
+            // return array of ResponseBorrowDto
+            return MOCK_BORROWS.filter((b) => !b.returned).map((b) => ({
+                id: b.id,
+                bookId: b.bookId,
+                bookTitle: b.bookTitle,
+                borrowerId: b.borrowerId ?? MOCK_USERS[0].id,
+                borrowerName: b.borrowerName ?? MOCK_USERS[0].name,
+                ownerId: b.ownerId ?? MOCK_USERS[0].id,
+                ownerName: b.ownerName ?? MOCK_USERS[0].name,
+                borrowDate: b.borrowDate,
+                returnDate: b.returnDate,
+                returned: b.returned,
+            }));
         }
 
-        if (endpoint === "/Borrow/borrow") {
+        if (ep === "/borrow/borrow") {
             const book = MOCK_BOOKS.find((b) => b.id === data.bookId);
             if (book) book.status = "CheckedOut";
 
@@ -93,6 +117,10 @@ async function request(method, endpoint, data = null) {
                 id: Date.now(),
                 bookId: data.bookId,
                 bookTitle: book?.title ?? "Livro",
+                borrowerId: MOCK_USERS[0].id,
+                borrowerName: MOCK_USERS[0].name,
+                ownerId: book?.ownerId ?? MOCK_USERS[0].id,
+                ownerName: book?.ownerName ?? MOCK_USERS[0].name,
                 borrowDate: new Date().toISOString(),
                 returned: false,
             };
@@ -100,13 +128,21 @@ async function request(method, endpoint, data = null) {
             return borrow;
         }
 
-        if (endpoint === "/Borrow/return") {
-            const borrow = MOCK_BORROWS.find(
-                (b) => b.bookId === data.bookId && !b.returned
-            );
+        if (ep === "/borrow/return") {
+            // support both { borrowId } and { bookId }
+            const borrowId = data?.borrowId ?? null;
+            const bookId = data?.bookId ?? null;
+
+            let borrow = null;
+            if (borrowId) {
+                borrow = MOCK_BORROWS.find((b) => b.id === borrowId && !b.returned);
+            } else if (bookId) {
+                borrow = MOCK_BORROWS.find((b) => b.bookId === bookId && !b.returned);
+            }
+
             if (borrow) borrow.returned = true;
 
-            const book = MOCK_BOOKS.find((b) => b.id === data.bookId);
+            const book = MOCK_BOOKS.find((b) => b.id === (bookId ?? borrow?.bookId));
             if (book) book.status = "Available";
 
             return true;
@@ -138,7 +174,7 @@ async function request(method, endpoint, data = null) {
         // --------------------------------------------------------------------
         // LOGIN DO SEU BACKEND .NET RETORNA: { message, result }
         // --------------------------------------------------------------------
-        if (endpoint === "/User/login") {
+        if (ep === "/user/login") {
             return json.result;
         }
 
@@ -157,10 +193,10 @@ let MOCK_USERS = [
 ];
 
 let MOCK_BOOKS = [
-    { id: 101, title: "O Design do Dia a Dia", author: "Donald Norman", publicationYear: 2013, status: "Available", userId: 1 },
-    { id: 102, title: "Arquitetura Limpa", author: "Robert C. Martin", publicationYear: 2017, status: "CheckedOut", userId: 1 },
+    { id: 101, title: "O Design do Dia a Dia", author: "Donald Norman", publicationYear: 2013, status: "Available", ownerId: 1, ownerName: "Leitor Demo", ownerEmail: "demo@teste.com" },
+    { id: 102, title: "Arquitetura Limpa", author: "Robert C. Martin", publicationYear: 2017, status: "CheckedOut", ownerId: 1, ownerName: "Leitor Demo", ownerEmail: "demo@teste.com" },
 ];
 
 let MOCK_BORROWS = [
-    { id: 1, bookId: 102, bookTitle: "Arquitetura Limpa", borrowDate: "2024-01-01", returned: false },
+    { id: 1, bookId: 102, bookTitle: "Arquitetura Limpa", borrowerId: 1, borrowerName: "Leitor Demo", ownerId: 1, ownerName: "Leitor Demo", borrowDate: "2024-01-01", returned: false },
 ];
