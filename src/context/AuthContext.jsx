@@ -34,7 +34,8 @@ export const AuthProvider = ({ children }) => {
 
     const register = async (name, email, password) => {
         try {
-            await api.post("/user", { name, email, password, active: true });
+            // CreateUserDto expects: { name, email, password }
+            await api.post("/user", { name, email, password });
             await login(email, password);
             return true;
         } catch (error) {
