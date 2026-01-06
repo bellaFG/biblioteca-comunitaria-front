@@ -17,10 +17,11 @@ const CreateBook = ({ setPage }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
+            // CreateBookDto expects: { title, author, publicationYear }
             await api.post("/book", {
-                ...formData,
-                userId: user.id,
-                status: "Available",
+                title: formData.title,
+                author: formData.author,
+                publicationYear: Number(formData.publicationYear),
             });
             alert("Livro adicionado com sucesso!");
             setPage("books");
