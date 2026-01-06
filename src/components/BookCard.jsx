@@ -4,16 +4,18 @@ import { Book, Trash2 } from "lucide-react";
 import Button from "./Button";
 
 const BookCard = ({ book, user, onBorrow, onDelete }) => {
-    const isAvailable = book.status === "Available";
-    const isOwner = user?.id === book.userId;
+    const isAvailable = book.status === "Available" || book.status === 0 || book.status === 'Available';
+    // support multiple owner shapes returned by backend: { ownerId } or { owner: { userId } }
+    const ownerId = book.ownerId ?? book.owner?.userId ?? book.owner?.ownerId ?? book.userId;
+    const isOwner = user?.id === ownerId;
 
     return (
         <div className="group bg-white rounded-lg p-6 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] transition-all duration-500 flex flex-col h-full border border-stone-100 hover:border-[#EBE5D9]">
             <div className="flex justify-between items-start mb-6">
                 <span
                     className={`px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase border ${isAvailable
-                            ? "border-stone-200 text-stone-600 bg-stone-50"
-                            : "border-stone-200 text-stone-400 bg-stone-50 line-through decoration-stone-400"
+                        ? "border-stone-200 text-stone-600 bg-stone-50"
+                        : "border-stone-200 text-stone-400 bg-stone-50 line-through decoration-stone-400"
                         }`}
                 >
                     {isAvailable ? "Disponível" : "Emprestado"}
