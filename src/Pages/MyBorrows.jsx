@@ -53,7 +53,7 @@ const MyBorrows = ({ setPage }) => {
                             </div>
                             <div>
                                 <h4 className="font-serif text-xl text-stone-900 mb-1">
-                                    {borrow.book?.title ?? "Livro"}
+                                    {borrow.bookTitle ?? borrow.book?.title ?? "Livro"}
                                 </h4>
                                 <p className="text-xs text-stone-400 uppercase tracking-widest flex items-center mt-2">
                                     <Calendar size={12} className="mr-2" />
