@@ -1,5 +1,10 @@
 const API_BASE_URL = "http://localhost:5154/api";
 
+let _unauthorizedHandler = null;
+export function setUnauthorizedHandler(fn) {
+    _unauthorizedHandler = fn;
+}
+
 export const api = {
     get: (endpoint) => request("GET", endpoint),
     post: (endpoint, data) => request("POST", endpoint, data),
@@ -22,7 +27,12 @@ export const api = {
 
         if (!response.ok) {
             const text = await response.text();
-            throw new Error(text || `Erro ${response.status}`);
+            try {
+                const parsed = JSON.parse(text);
+                throw new Error(parsed?.message || text || `Erro ${response.status}`);
+            } catch (e) {
+                throw new Error(text || `Erro ${response.status}`);
+            }
         }
 
         return response.json();
@@ -40,6 +50,8 @@ async function request(method, endpoint, data = null) {
     const ep = endpoint.toLowerCase();
 
     try {
+        // debug: show whether Authorization header will be sent
+        try { console.debug("API request", method, endpoint, { authHeader: headers.Authorization }); } catch (e) {}
         const response = await fetch(`${API_BASE_URL}${endpoint}`, {
             method,
             headers,
@@ -47,8 +59,26 @@ async function request(method, endpoint, data = null) {
         });
 
         if (!response.ok) {
+            if (response.status === 401) {
+                try {
+                    if (typeof _unauthorizedHandler === "function") {
+                        _unauthorizedHandler();
+                    } else {
+                        localStorage.removeItem("library_token");
+                        localStorage.removeItem("library_user");
+                        try { window.location.reload(); } catch (e) {}
+                    }
+                } catch (e) {}
+            }
             const errorText = await response.text();
-            throw new Error(errorText || `Erro ${response.status}`);
+            let message = errorText;
+            try {
+                const parsed = JSON.parse(errorText);
+                if (parsed && parsed.message) message = parsed.message;
+            } catch (e) {
+                // not JSON, keep original text
+            }
+            throw new Error(message || `Erro ${response.status}`);
         }
 
         if (response.status === 204) return null;
