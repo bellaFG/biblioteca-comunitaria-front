@@ -13,7 +13,43 @@ export const api = {
     post: (endpoint, data) => request("POST", endpoint, data),
     put: (endpoint, data) => request("PUT", endpoint, data),
     delete: (endpoint) => request("DELETE", endpoint),
+    // upload cover file: POST /book/{id}/cover
+    uploadCover: async (bookId, file) => uploadCover(bookId, file),
 };
+
+async function uploadCover(bookId, file) {
+    const token = localStorage.getItem("library_token");
+
+    if (USE_DEMO_DATA) {
+        await delay(200);
+        // simulate cover URL
+        const url = `/_mock_covers/${bookId}.png`;
+        // update mock book
+        const b = MOCK_BOOKS.find((x) => x.id === bookId || String(x.id) === String(bookId));
+        if (b) b.coverUrl = url;
+        return { coverUrl: url };
+    }
+
+    const form = new FormData();
+    form.append("file", file);
+
+    const headers = {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    };
+
+    const response = await fetch(`${API_BASE_URL}/book/${bookId}/cover`, {
+        method: "POST",
+        headers,
+        body: form,
+    });
+
+    if (!response.ok) {
+        const text = await response.text();
+        throw new Error(text || `Erro ${response.status}`);
+    }
+
+    return response.json();
+}
 
 /* ========================================================================
    REQUEST GENÉRICO — funciona para demo e para backend real
