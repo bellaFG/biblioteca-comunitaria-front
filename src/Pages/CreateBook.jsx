@@ -18,14 +18,12 @@ const CreateBook = ({ setPage }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            // CreateBookDto expects: { title, author, publicationYear }
             const created = await api.post("/book", {
                 title: formData.title,
                 author: formData.author,
                 publicationYear: Number(formData.publicationYear),
             });
 
-            // If user provided a cover file, upload it (protected by JWT)
             if (coverFile && created?.id) {
                 try {
                     setUploading(true);

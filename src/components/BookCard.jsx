@@ -39,7 +39,6 @@ const BookCard = ({ book, user, onBorrow, onDelete, onEdit }) => {
             </div>
 
             <div className="mb-6 relative mx-auto w-32 shadow-lg shadow-stone-200 group-hover:shadow-xl group-hover:scale-105 transition-all duration-500">
-                {/** show cover image when available, otherwise placeholder */}
                 {book.coverUrl || book.cover?.url || book.imageUrl ? (
                     <div className="aspect-[2/3] w-full overflow-hidden rounded">
                         <img

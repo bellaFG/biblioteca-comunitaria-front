@@ -28,7 +28,6 @@ const Books = ({ setPage }) => {
     const handleBorrow = async (bookId) => {
         if (!user) return setPage("login");
         try {
-            // Back-end espera CreateBorrowDto { BookId } + usuário pelo JWT
             await api.post("/borrow/borrow", { bookId });
             alert("Sucesso! Boa leitura.");
             fetchBooks();

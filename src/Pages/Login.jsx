@@ -3,7 +3,6 @@ import { BookOpen } from "lucide-react";
 import Input from "../components/Input";
 import Button from "../components/Button";
 import { useAuth } from "../context/AuthContext";
-import { USE_DEMO_DATA } from "../api/api";
 
 const Login = ({ setPage }) => {
     const { login } = useAuth();
@@ -62,11 +61,7 @@ const Login = ({ setPage }) => {
                         Crie sua conta
                     </button>
                 </div>
-                {USE_DEMO_DATA && (
-                    <div className="mt-8 text-center text-[10px] text-stone-300 font-mono">
-                        DEMO: demo@teste.com / 123
-                    </div>
-                )}
+
             </div>
         </div>
     );
