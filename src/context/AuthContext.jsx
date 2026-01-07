@@ -1,11 +1,13 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { api } from "../api/api";
+import { api, setUnauthorizedHandler } from "../api/api";
+import { useModal } from "./ModalContext";
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
+    const { showModal } = useModal();
 
     useEffect(() => {
         const storedUser = localStorage.getItem("library_user");
@@ -19,12 +21,19 @@ export const AuthProvider = ({ children }) => {
     const login = async (email, password) => {
         try {
             const data = await api.post("/user/login", { email, password });
-            localStorage.setItem("library_token", data.token);
-            localStorage.setItem("library_user", JSON.stringify(data));
-            setUser(data);
+            // normalize token location and strip surrounding quotes if any
+            const token = (data?.token ?? data?.result?.token ?? "")
+                .toString()
+                .replace(/^\"|\"$/g, "")
+                .trim();
+            localStorage.setItem("library_token", token);
+            // store user object without token for safety
+            const userObj = { id: data.id ?? data.result?.id, name: data.name ?? data.result?.name, email: data.email ?? data.result?.email };
+            localStorage.setItem("library_user", JSON.stringify({ ...userObj, token }));
+            setUser({ ...userObj, token });
             return true;
         } catch (error) {
-            alert("Falha no login: " + error.message);
+            await showModal("Falha no login: " + error.message);
             return false;
         }
     };
@@ -35,7 +44,7 @@ export const AuthProvider = ({ children }) => {
             await login(email, password);
             return true;
         } catch (error) {
-            alert("Erro ao registrar: " + error.message);
+            await showModal("Erro ao registrar: " + error.message);
             return false;
         }
     };
@@ -45,6 +54,11 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem("library_user");
         setUser(null);
     };
+
+    useEffect(() => {
+        setUnauthorizedHandler(logout);
+        return () => setUnauthorizedHandler(null);
+    }, [logout]);
 
     return (
         <AuthContext.Provider value={{ user, loading, login, register, logout }}>
