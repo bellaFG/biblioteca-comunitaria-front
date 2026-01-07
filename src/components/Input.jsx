@@ -1,4 +1,3 @@
-// src/components/Input.jsx
 import React from "react";
 
 const Input = ({ label, type, value, onChange, placeholder, required }) => (

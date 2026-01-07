@@ -1,4 +1,3 @@
-// src/components/Navbar.jsx
 import React from "react";
 import { BookOpen, LogOut } from "lucide-react";
 import Button from "./Button";

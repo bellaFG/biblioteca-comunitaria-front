@@ -1,11 +1,9 @@
-// src/components/BookCard.jsx
 import React from "react";
 import { Book, Trash2 } from "lucide-react";
 import Button from "./Button";
 
-const BookCard = ({ book, user, onBorrow, onDelete }) => {
+const BookCard = ({ book, user, onBorrow, onDelete, onEdit }) => {
     const isAvailable = book.status === "Available" || book.status === 0 || book.status === 'Available';
-    // support multiple owner shapes returned by backend: { ownerId } or { owner: { userId } }
     const ownerId = book.ownerId ?? book.owner?.userId ?? book.owner?.ownerId ?? book.userId;
     const isOwner = user?.id === ownerId;
 
@@ -21,25 +19,46 @@ const BookCard = ({ book, user, onBorrow, onDelete }) => {
                     {isAvailable ? "Disponível" : "Emprestado"}
                 </span>
                 {isOwner && (
-                    <button
-                        onClick={() => onDelete(book.id)}
-                        className="text-stone-300 hover:text-[#9C6644] transition-colors"
-                    >
-                        <Trash2 size={16} />
-                    </button>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => onDelete(book.id)}
+                            className="text-stone-300 hover:text-[#9C6644] transition-colors"
+                        >
+                            <Trash2 size={16} />
+                        </button>
+                        {typeof onEdit === 'function' && (
+                            <button
+                                onClick={() => onEdit(book)}
+                                className="text-stone-300 hover:text-[#9C6644] transition-colors"
+                            >
+                                Edit
+                            </button>
+                        )}
+                    </div>
                 )}
             </div>
 
             <div className="mb-6 relative mx-auto w-32 shadow-lg shadow-stone-200 group-hover:shadow-xl group-hover:scale-105 transition-all duration-500">
-                <div className="aspect-[2/3] bg-[#F5F0E6] w-full flex flex-col items-center justify-center relative overflow-hidden border border-[#EBE5D9]">
-                    <div className="absolute top-0 right-0 w-16 h-16 bg-[#EBE5D9] rounded-full blur-xl opacity-60 translate-x-4 -translate-y-4"></div>
-                    <div className="absolute bottom-0 left-0 w-20 h-20 bg-[#DCCBB8] rounded-full blur-2xl opacity-40 -translate-x-4 translate-y-4"></div>
-
-                    <div className="z-10 text-center px-2">
-                        <span className="block w-8 h-px bg-stone-400 mx-auto mb-2"></span>
-                        <Book size={24} className="text-stone-400 mx-auto" strokeWidth={1} />
+                {/** show cover image when available, otherwise placeholder */}
+                {book.coverUrl || book.cover?.url || book.imageUrl ? (
+                    <div className="aspect-[2/3] w-full overflow-hidden rounded">
+                        <img
+                            src={book.coverUrl ?? book.cover?.url ?? book.imageUrl}
+                            alt={book.title}
+                            className="w-full h-full object-cover"
+                        />
                     </div>
-                </div>
+                ) : (
+                    <div className="aspect-[2/3] bg-[#F5F0E6] w-full flex flex-col items-center justify-center relative overflow-hidden border border-[#EBE5D9]">
+                        <div className="absolute top-0 right-0 w-16 h-16 bg-[#EBE5D9] rounded-full blur-xl opacity-60 translate-x-4 -translate-y-4"></div>
+                        <div className="absolute bottom-0 left-0 w-20 h-20 bg-[#DCCBB8] rounded-full blur-2xl opacity-40 -translate-x-4 translate-y-4"></div>
+
+                        <div className="z-10 text-center px-2">
+                            <span className="block w-8 h-px bg-stone-400 mx-auto mb-2"></span>
+                            <Book size={24} className="text-stone-400 mx-auto" strokeWidth={1} />
+                        </div>
+                    </div>
+                )}
             </div>
 
             <div className="text-center mt-2">
