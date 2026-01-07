@@ -6,6 +6,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Books from "./pages/Books";
 import CreateBook from "./pages/CreateBook";
+import EditBook from "./pages/EditBook";
 import MyBorrows from "./pages/MyBorrows";
 
 const AppContent = () => {
@@ -35,6 +36,7 @@ const AppContent = () => {
         {activePage === "register" && <Register setPage={setActivePage} />}
         {activePage === "books" && <Books setPage={setActivePage} />}
         {activePage === "create-book" && <CreateBook setPage={setActivePage} />}
+        {activePage === "edit-book" && <EditBook setPage={setActivePage} />}
         {activePage === "my-borrows" && <MyBorrows setPage={setActivePage} />}
       </main>
 
