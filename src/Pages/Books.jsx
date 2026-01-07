@@ -4,9 +4,11 @@ import Button from "../components/Button";
 import BookCard from "../components/BookCard";
 import { api } from "../api/api";
 import { useAuth } from "../context/AuthContext";
+import { useModal } from "../context/ModalContext";
 
 const Books = ({ setPage }) => {
     const { user } = useAuth();
+    const { showModal } = useModal();
     const [books, setBooks] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -29,10 +31,10 @@ const Books = ({ setPage }) => {
         if (!user) return setPage("login");
         try {
             await api.post("/borrow/borrow", { bookId });
-            alert("Sucesso! Boa leitura.");
+            await showModal("Sucesso! Boa leitura.");
             fetchBooks();
         } catch (error) {
-            alert("Erro ao emprestar: " + error.message);
+            await showModal("Erro ao emprestar: " + error.message);
         }
     };
 
@@ -42,7 +44,7 @@ const Books = ({ setPage }) => {
             await api.delete(`/book/${bookId}`);
             fetchBooks();
         } catch (error) {
-            alert("Erro ao deletar: " + error.message);
+            await showModal("Erro ao deletar: " + error.message);
         }
     };
 

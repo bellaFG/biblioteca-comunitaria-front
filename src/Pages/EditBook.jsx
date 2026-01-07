@@ -4,9 +4,11 @@ import Input from "../components/Input";
 import Button from "../components/Button";
 import { api } from "../api/api";
 import { useAuth } from "../context/AuthContext";
+import { useModal } from "../context/ModalContext";
 
 const EditBook = ({ setPage }) => {
     const { user } = useAuth();
+    const { showModal } = useModal();
     const [book, setBook] = useState(null);
     const [formData, setFormData] = useState({ title: "", author: "", publicationYear: "" });
     const [coverFile, setCoverFile] = useState(null);
@@ -69,15 +71,15 @@ const EditBook = ({ setPage }) => {
                     await api.uploadCover(book.id, coverFile);
                 } catch (err) {
                     console.error("Cover upload failed:", err);
-                    alert("Livro atualizado, mas falha ao enviar a capa: " + err.message);
+                    await showModal("Livro atualizado, mas falha ao enviar a capa: " + err.message);
                 }
             }
 
-            alert("Livro atualizado com sucesso!");
+            await showModal("Livro atualizado com sucesso!");
             localStorage.removeItem("edit_book");
             setPage("books");
         } catch (err) {
-            alert("Erro ao atualizar livro: " + err.message);
+            await showModal("Erro ao atualizar livro: " + err.message);
         } finally {
             setSaving(false);
         }

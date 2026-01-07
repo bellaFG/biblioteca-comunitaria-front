@@ -4,6 +4,7 @@ import Input from "../components/Input";
 import Button from "../components/Button";
 import { api } from "../api/api";
 import { useAuth } from "../context/AuthContext";
+import { useModal } from "../context/ModalContext";
 
 const CreateBook = ({ setPage }) => {
     const { user } = useAuth();
@@ -12,6 +13,7 @@ const CreateBook = ({ setPage }) => {
         author: "",
         publicationYear: "",
     });
+    const { showModal } = useModal();
     const [coverFile, setCoverFile] = useState(null);
     const [uploading, setUploading] = useState(false);
 
@@ -30,16 +32,16 @@ const CreateBook = ({ setPage }) => {
                     await api.uploadCover(created.id, coverFile);
                 } catch (err) {
                     console.error("Cover upload failed:", err);
-                    alert("Livro criado, mas falha ao enviar a capa: " + err.message);
+                    await showModal("Livro criado, mas falha ao enviar a capa: " + err.message);
                 } finally {
                     setUploading(false);
                 }
             }
 
-            alert("Livro adicionado com sucesso!");
+            await showModal("Livro adicionado com sucesso!");
             setPage("books");
         } catch (error) {
-            alert("Erro ao criar livro: " + error.message);
+            await showModal("Erro ao criar livro: " + error.message);
         }
     };
 

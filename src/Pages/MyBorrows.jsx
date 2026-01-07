@@ -3,10 +3,12 @@ import { Book, BookOpen, Calendar } from "lucide-react";
 import Button from "../components/Button";
 import { api } from "../api/api";
 import { useAuth } from "../context/AuthContext";
+import { useModal } from "../context/ModalContext";
 
 const MyBorrows = ({ setPage }) => {
     const { user } = useAuth();
     const [borrows, setBorrows] = useState([]);
+    const { showModal } = useModal();
 
     useEffect(() => {
         const fetchBorrows = async () => {
@@ -24,9 +26,9 @@ const MyBorrows = ({ setPage }) => {
         try {
             await api.post("/borrow/return", { borrowId: borrow.id });
             setBorrows(borrows.filter((b) => b.id !== borrow.id));
-            alert("Livro devolvido com sucesso!");
+            await showModal("Livro devolvido com sucesso!");
         } catch (error) {
-            alert("Erro ao devolver: " + error.message);
+            await showModal("Erro ao devolver: " + error.message);
         }
     };
 
