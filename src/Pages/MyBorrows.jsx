@@ -1,4 +1,3 @@
-// src/pages/MyBorrows.jsx
 import React, { useEffect, useState } from "react";
 import { Book, BookOpen, Calendar } from "lucide-react";
 import Button from "../components/Button";
@@ -23,7 +22,6 @@ const MyBorrows = ({ setPage }) => {
 
     const handleReturn = async (borrow) => {
         try {
-            // Back espera ReturnBorrowDto { BorrowId }
             await api.post("/borrow/return", { borrowId: borrow.id });
             setBorrows(borrows.filter((b) => b.id !== borrow.id));
             alert("Livro devolvido com sucesso!");

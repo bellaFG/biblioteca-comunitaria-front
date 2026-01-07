@@ -1,4 +1,3 @@
-// src/pages/CreateBook.jsx
 import React, { useState } from "react";
 import { ArrowRight } from "lucide-react";
 import Input from "../components/Input";
@@ -13,16 +12,32 @@ const CreateBook = ({ setPage }) => {
         author: "",
         publicationYear: "",
     });
+    const [coverFile, setCoverFile] = useState(null);
+    const [uploading, setUploading] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
             // CreateBookDto expects: { title, author, publicationYear }
-            await api.post("/book", {
+            const created = await api.post("/book", {
                 title: formData.title,
                 author: formData.author,
                 publicationYear: Number(formData.publicationYear),
             });
+
+            // If user provided a cover file, upload it (protected by JWT)
+            if (coverFile && created?.id) {
+                try {
+                    setUploading(true);
+                    await api.uploadCover(created.id, coverFile);
+                } catch (err) {
+                    console.error("Cover upload failed:", err);
+                    alert("Livro criado, mas falha ao enviar a capa: " + err.message);
+                } finally {
+                    setUploading(false);
+                }
+            }
+
             alert("Livro adicionado com sucesso!");
             setPage("books");
         } catch (error) {
@@ -84,6 +99,15 @@ const CreateBook = ({ setPage }) => {
                             placeholder="2024"
                         />
                     </div>
+
+                    <div className="mt-4">
+                        <label className="block text-sm font-medium text-stone-700 mb-2">Capa (opcional)</label>
+                        <input
+                            type="file"
+                            accept="image/png,image/jpeg,image/jpg,image/webp"
+                            onChange={(e) => setCoverFile(e.target.files?.[0] ?? null)}
+                        />
+                    </div>
                     <div className="mt-12 flex justify-end gap-4">
                         <Button
                             type="button"
@@ -92,7 +116,7 @@ const CreateBook = ({ setPage }) => {
                         >
                             Cancelar
                         </Button>
-                        <Button type="submit">Adicionar ao Acervo</Button>
+                        <Button type="submit" disabled={uploading}>{uploading ? 'Enviando...' : 'Adicionar ao Acervo'}</Button>
                     </div>
                 </form>
             </div>

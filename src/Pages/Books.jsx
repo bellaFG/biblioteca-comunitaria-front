@@ -1,4 +1,3 @@
-// src/pages/Books.jsx
 import React, { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
 import Button from "../components/Button";
@@ -94,6 +93,10 @@ const Books = ({ setPage }) => {
                             user={user}
                             onBorrow={handleBorrow}
                             onDelete={handleDelete}
+                            onEdit={(b) => {
+                                localStorage.setItem("edit_book", JSON.stringify(b));
+                                setPage("edit-book");
+                            }}
                         />
                     ))}
                     {books.length === 0 && (

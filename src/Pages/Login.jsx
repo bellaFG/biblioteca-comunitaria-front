@@ -1,4 +1,3 @@
-// src/pages/Login.jsx
 import React, { useState } from "react";
 import { BookOpen } from "lucide-react";
 import Input from "../components/Input";
