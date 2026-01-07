@@ -1,4 +1,3 @@
-// src/context/AuthContext.jsx
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { api } from "../api/api";
 
@@ -8,7 +7,6 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    // Recupera sessão do localStorage
     useEffect(() => {
         const storedUser = localStorage.getItem("library_user");
         const token = localStorage.getItem("library_token");
@@ -21,7 +19,6 @@ export const AuthProvider = ({ children }) => {
     const login = async (email, password) => {
         try {
             const data = await api.post("/user/login", { email, password });
-            // data já vem como { id, name, email, token } (tanto no demo quanto no back real)
             localStorage.setItem("library_token", data.token);
             localStorage.setItem("library_user", JSON.stringify(data));
             setUser(data);
@@ -34,7 +31,6 @@ export const AuthProvider = ({ children }) => {
 
     const register = async (name, email, password) => {
         try {
-            // CreateUserDto expects: { name, email, password }
             await api.post("/user", { name, email, password });
             await login(email, password);
             return true;
