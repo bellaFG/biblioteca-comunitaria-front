@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import { ModalProvider } from "./context/ModalContext";
 import Navbar from "./components/Navbar";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -54,8 +55,10 @@ const AppContent = () => {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
+    <ModalProvider>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </ModalProvider>
   );
 }
