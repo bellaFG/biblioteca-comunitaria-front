@@ -51,7 +51,7 @@ async function request(method, endpoint, data = null) {
 
     try {
         // debug: show whether Authorization header will be sent
-        try { console.debug("API request", method, endpoint, { authHeader: headers.Authorization }); } catch (e) {}
+        try { console.debug("API request", method, endpoint, { authHeader: headers.Authorization }); } catch (e) { }
         const response = await fetch(`${API_BASE_URL}${endpoint}`, {
             method,
             headers,
@@ -66,9 +66,9 @@ async function request(method, endpoint, data = null) {
                     } else {
                         localStorage.removeItem("library_token");
                         localStorage.removeItem("library_user");
-                        try { window.location.reload(); } catch (e) {}
+                        try { window.location.reload(); } catch (e) { }
                     }
-                } catch (e) {}
+                } catch (e) { }
             }
             const errorText = await response.text();
             let message = errorText;
